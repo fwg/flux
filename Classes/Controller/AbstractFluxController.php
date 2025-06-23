@@ -27,6 +27,7 @@ use FluidTYPO3\Flux\Utility\RecursiveArrayUtility;
 use FluidTYPO3\Flux\ViewHelpers\FormViewHelper;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use TYPO3\CMS\Core\Domain\Repository\PageRepository;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\VersionNumberUtility;
 use TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface;
@@ -579,6 +580,15 @@ abstract class AbstractFluxController extends ActionController
             $tsfe->currentRecord ?: $contentObject->currentRecord
         );
         $record = $this->recordService->getSingle($table, '*', (integer) $recordUid);
+
+        if ($record !== null) {
+            /** @var PageRepository $sys_page */
+            $sys_page = $tsfe->sys_page instanceof PageRepository ?
+                $tsfe->sys_page :
+                GeneralUtility::makeInstance(PageRepository::class);
+            $record = $sys_page->getLanguageOverlay($table, $record);
+        }
+
         if ($record === null) {
             throw new \UnexpectedValueException(
                 "Record of table " . $this->getFluxTableName() . ' not found',
@@ -586,16 +596,6 @@ abstract class AbstractFluxController extends ActionController
             );
         }
 
-        if ($record['_LOCALIZED_UID'] ?? false) {
-            $record = array_merge(
-                $record,
-                $this->recordService->getSingle(
-                    (string) $this->getFluxTableName(),
-                    '*',
-                    $record['_LOCALIZED_UID']
-                ) ?? $record
-            );
-        }
         return $record;
     }
 
