@@ -7,6 +7,7 @@ use FluidTYPO3\Flux\Provider\Interfaces\GridProviderInterface;
 use FluidTYPO3\Flux\Provider\ProviderResolver;
 use FluidTYPO3\Flux\Service\WorkspacesAwareRecordService;
 use FluidTYPO3\Flux\Utility\ColumnNumberUtility;
+use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class ColumnPositionItems
@@ -27,7 +28,13 @@ class ColumnPositionItems
      */
     public function colPosListItemProcFunc(array &$parameters): void
     {
-        $parentRecordUid = ColumnNumberUtility::calculateParentUid($parameters['row']['colPos']);
+        if (!isset($parameters['row']['colPos'])) {
+            $row = BackendUtility::getRecord($parameters['table'], $parameters['row']['uid'], 'colPos');
+            $colPos = $row['colPos'] ?? 0;
+        } else {
+            $colPos = $parameters['row']['colPos'];
+        }
+        $parentRecordUid = ColumnNumberUtility::calculateParentUid($colPos);
         $parentRecord = $this->recordService->getSingle('tt_content', '*', $parentRecordUid);
         $provider = $this->providerResolver->resolvePrimaryConfigurationProvider('tt_content', null, $parentRecord);
         if ($parentRecord && $provider instanceof GridProviderInterface) {
