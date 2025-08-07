@@ -583,7 +583,8 @@ abstract class AbstractFluxController extends ActionController
 
         if ($record !== null) {
             /** @var PageRepository $sys_page */
-            $sys_page = $tsfe->sys_page instanceof PageRepository ?
+
+            $sys_page = ($tsfe->sys_page ?? null) instanceof PageRepository ?
                 $tsfe->sys_page :
                 GeneralUtility::makeInstance(PageRepository::class);
             $record = $sys_page->getLanguageOverlay($table, $record);
