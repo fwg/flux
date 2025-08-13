@@ -38,9 +38,9 @@ abstract class ColumnNumberUtility
         return (int) $colPos % static::MULTIPLIER;
     }
 
-    public static function calculateParentUid(int $colPos): int
+    public static function calculateParentUid(?int $colPos): int
     {
-        return (int) floor($colPos / static::MULTIPLIER);
+        return (int) floor(((int)$colPos) / static::MULTIPLIER);
     }
 
     public static function calculateColumnNumberForParentAndColumn(int $parentUid, int $columnNumber): int
